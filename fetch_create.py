@@ -116,7 +116,7 @@ def main():
   
 
    #jira_url = input('Enter API url to fetch fields:')
-   #mail = input('Enter your email or username:')
+   #email = input('Enter your email or username:')
    #api_key = input('Enter your jira token password:')
 
    # Taking inputs from the environment 
