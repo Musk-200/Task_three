@@ -1,5 +1,4 @@
-'''importing all the required jira libraries'''
-
+'''importing all the required libraries'''
 from jira import JIRA
 import requests 
 import json
@@ -9,12 +8,9 @@ from requests.auth import HTTPBasicAuth
 from jira import JIRA, JIRAError
 from jira.exceptions import JIRAError
 
-
-
-# Function to generate  jira issue taking inf of different fields
+'''Function to generate  jira issue after getting values of all the fields through jira API'''
 
 def generate_issue(json_obj, jira_url, email, api_key):
-   #url="https://ibm-team-uz9mmme2.atlassian.net//rest/api/2/issue"
    headers={
      "Accept": "application/json",
      "Content-Type": "application/json"
@@ -26,8 +22,6 @@ def generate_issue(json_obj, jira_url, email, api_key):
    issue_priority = json_obj["fields"]["priority"]["name"]
    issue_component = [component['name'] for component in json_obj["fields"]["components"]]
    issue_labels =  json_obj["fields"]["labels"]
-   
-
    payload=json.dumps(
    {
       "fields": {
@@ -58,27 +52,23 @@ def generate_issue(json_obj, jira_url, email, api_key):
    else:
       print('failed')
     
-   
-'''Function to authenticate  the api key and email wtih the given url'''
+'''Function to authenticate the api_key and email wtih the given url for making a valid credential entry'''
 
 def get_authenticated(response):
     if response.status_code == 200:
       print ('Data retrieved successfully')
       print (response.status_code)
       return response
-
     else:
       print (response.status_code)
       print('Error retrieving data:', response.text)
 
-
-'''Fetching the required data from the user '''
+'''Function created to fetch the values of different fields from the user API '''
 
 def fetch_data(json_obj):
   try:
     data = json.loads(json_obj.text)
     if(json_obj.status_code == 200):
-      # fetching all the required details to create an issue in JIRA
       project_key = data["fields"]["project"]["key"]
       issue_summary = data["fields"]["summary"]
       issue_description = issue_summary.split('-')[-1]
@@ -96,30 +86,15 @@ def fetch_data(json_obj):
       print("IssueLabels: ",issue_labels)
       print("IssueComponents: ",issue_component)
 
-      # returns json data in dictionary format
       return data
    
   except JIRAError:
-        # Handle JSON decoding error
         print("Error: Unable to decode JSON data")
         print(f"Error: HTTP status code {json_obj.status_code}")
         return None
 
 
-
-def main():
-    
-    # Authenticate to the JIRA server
-    #email = "muskan.kumari@ibm.com"
-    #api_key = "ATATT3xFfGF0NLTmYfrrBknz_BymaCv3YNOnAkIusmell0sXMMfigOZWKWDo-0JU3JaXjqkyFxCigpppF-eh1RLrAW_rkJir-O4793sN-IY6vAN03goDgXlgBB--WXfjkdVC3OJp-GO1KeJYeXmdW5ofsdpoM3iZ5S-YaGDrhwXQTh9EE0non9o=D99A6AEF"
-   # jira_url="https://ibm-team-uz9mmme2.atlassian.net//rest/api/2/issue/TES-9"
-  
-
-   #jira_url = input('Enter API url to fetch fields:')
-   #email = input('Enter your email or username:')
-   #api_key = input('Enter your jira token password:')
-
-   # Taking inputs from the environment 
+def main(): 
 
    jira_url = os.environ.get('API_URL')
    email = os.environ.get('USERNAME')
@@ -131,18 +106,13 @@ def main():
    response = requests.get(jira_url, auth = HTTPBasicAuth(email,api_key))
    
    
-   # validating the response for the request made
-   
+   # validating the response for the request made by calling it in get_authenticated()  function
    json_obj= get_authenticated(response)
-   #print(json.dumps(json_obj,indent=3))
-    
 
-   #  Fetching values of different fields for creating jira issue from the programmer
+   #  Fetching values of different fields for creating jira issue under fetch_data() function and storing those data
    json_data = fetch_data(json_obj)
 
-   
-   # generating new issue on jira taking all the information and passing under the given function
-
+   # generating new issue on jira after passing under the given function name 
    generate_issue(json_data, "https://ibm-team-uz9mmme2.atlassian.net//rest/api/2/issue", email, api_key)
 
 
