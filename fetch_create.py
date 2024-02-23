@@ -96,9 +96,13 @@ def fetch_data(json_obj):
 
 def main(): 
 
-   jira_url = os.environ.get('API_URL')
+   '''jira_url = os.environ.get('API_URL')
    email = os.environ.get('USERNAME')
-   api_key = os.environ.get('PASSWORD')
+    api_key= os.environ.get('PASSWORD')'''
+
+   jira_url = input("Enter api_url")
+   email = input("Enter your username")
+   api_key= input("Enter your password")
 
    response = requests.get(jira_url, auth = HTTPBasicAuth(email,api_key))
    
@@ -110,7 +114,7 @@ def main():
    json_data = fetch_data(json_obj)
 
    # generating new issue on jira after passing under the given function name 
-   generate_issue(json_data, jira_url, email, api_key)
+   generate_issue(json_data, "https://ibm-team-uz9mmme2.atlassian.net//rest/api/2/issue", email, api_key)
 
 
 if __name__== "__main__": 
