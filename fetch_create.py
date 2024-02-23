@@ -96,13 +96,9 @@ def fetch_data(json_obj):
 
 def main(): 
 
-   '''jira_url = os.environ.get('API_URL')
+   jira_url = os.environ.get('API_URL')
    email = os.environ.get('USERNAME')
-    api_key= os.environ.get('PASSWORD')'''
-
-   jira_url = input("Enter api_url")
-   email = input("Enter your username")
-   api_key= input("Enter your password")
+   api_key= os.environ.get('PASSWORD')
 
    response = requests.get(jira_url, auth = HTTPBasicAuth(email,api_key))
    
