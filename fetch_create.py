@@ -110,7 +110,7 @@ def main():
    json_data = fetch_data(json_obj)
 
    # generating new issue on jira after passing under the given function name 
-   generate_issue(json_data, "ATATT3xFfGF0WQiApIYlqBx528kI4IVEf3cj1g2IRzxsKsYiPhVCWqinMAhtLgt0kO8Qlku49MPx8ja8RKMcvTg02ymdDjKgXWU-m45Jz4PjoHf8hEZICLWuqwzvdGEpgz_T_4Y6gAvHirUDLqrPPtrUSiFNeCxi2N6b7juMGrFM_tuiKpYxtdM=92FB38E6", email, api_key)
+   generate_issue(json_data, jira_url, email, api_key)
 
 
 if __name__== "__main__": 
