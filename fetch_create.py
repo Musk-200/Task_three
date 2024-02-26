@@ -1,4 +1,5 @@
 '''importing all the required libraries'''
+
 from jira import JIRA
 import requests 
 import json
@@ -10,18 +11,18 @@ from jira.exceptions import JIRAError
 
 '''Function to generate  jira issue after getting values of all the fields through jira API'''
 
-def generate_issue(json_obj, jira_url, email, api_key):
+def generate_issue(json_obj, jira_url, email, api_key, j):
    headers={
      "Accept": "application/json",
      "Content-Type": "application/json"
 }
-   project_key = json_obj["fields"]["project"]["key"]
-   issue_summary = json_obj["fields"]["summary"]
-   issue_description = issue_summary.split('-')[-1]
-   issue_type = json_obj["fields"]["issuetype"]["name"]
-   issue_priority = json_obj["fields"]["priority"]["name"]
-   issue_component = [component['name'] for component in json_obj["fields"]["components"]]
-   issue_labels =  json_obj["fields"]["labels"]
+   project_key = "QOPS"
+   issue_component = json_obj[j]["name"]
+   issue_summary = issue_component.split('-')[-1]+ "-750 UP7 IF04 Patch"
+   issue_description = "None"
+   issue_type = "Task"
+   issue_priority = "High"
+   issue_labels = ["interim_fix_750UP7IF04"]
    payload=json.dumps(
    {
       "fields": {
@@ -38,9 +39,7 @@ def generate_issue(json_obj, jira_url, email, api_key):
             "name" : issue_priority 
           } ,
           "labels": issue_labels,
-          "components":  [
-            {"name": val}
-               for val in issue_component]
+          "components": issue_component 
       }
    }
    )
@@ -65,17 +64,17 @@ def get_authenticated(response):
 
 '''Function created to fetch the values of different fields from the user API '''
 
-def fetch_data(json_obj):
+def fetch_data(json_obj, j):
   try:
     data = json.loads(json_obj.text)
     if(json_obj.status_code == 200):
-      project_key = data["fields"]["project"]["key"]
-      issue_summary = data["fields"]["summary"]
-      issue_description = issue_summary.split('-')[-1]
-      issue_type = data["fields"]["issuetype"]["name"]
-      issue_priority = data["fields"]["priority"]["name"]
-      issue_component = [component['name'] for component in data["fields"]["components"]]
-      issue_labels = data["fields"]["labels"]
+      project_key = "QOPS"
+      issue_component = data[j]["name"]
+      issue_summary = issue_component.split('-')[-1]+ "-750 UP7 IF04 Patch"
+      issue_description = "None"
+      issue_type = "Task"
+      issue_priority = "High"
+      issue_labels = ["interim_fix_750UP7IF04"]
 
       # displaying all the fetched data
       print("ProjectKey: ",project_key)
@@ -96,21 +95,48 @@ def fetch_data(json_obj):
 
 def main(): 
 
-   jira_url = os.environ.get('API_URL')
-   email = os.environ.get('USERNAME')
-   api_key= os.environ.get('PASSWORD')
+   #credentials from where api is being fetched
+   '''fetch_url = os.environ.get('API_URL')
+   fetch_email = os.environ.get('USERNAME')
+   fetch_api_key = os.environ.get('PASSWORD')
 
-   response = requests.get(jira_url, auth = HTTPBasicAuth(email,api_key))
+   # credentials of the location where jira issue is to be generated
+   generate_jira_url = os.environ.get('API_URL')
+   generate_email = os.environ.get('USERNAME')
+   generate_api_key= os.environ.get('PASSWORD')'''
+
+fetch_api = "https://jira.secintel.intranet.ibm.com/rest/api/2/project/QOPS/components/"
+fetch_email = "Neha.Singh41@ibm.com"
+fetch_api_key = "VfwPFdtKVS80nnH3Mhgqb8P4SQxhhQocYM6VeA"
+
+generate_jira_url = "https://ibm-team-uz9mmme2.atlassian.net/rest/api/2/issue"
+generate_email= "muskan.kumari@ibm.com"
+generate_api_key= "ATATT3xFfGF0H8mA20P9_bwWZZ1M8S2i4wIk6fJJwMVhAVZUODWFpAL2jgt-EcUXQGYzz9lzLhmK8hGtAyg24Hue8AzefX3FkkrisbXJNKS5GkrZMWlGb0WK10r7vaoqdGrwigYSWncjoIP3TAF1qreKgVHU0sI_76pVf_c6i7ZtDH7t8-IBJ_0=605A6439"
+
+
+response = requests.get(fetch_api, auth = HTTPBasicAuth(fetch_email,fetch_api_key))
    
    
    # validating the response for the request made by calling it in get_authenticated()  function
-   json_obj= get_authenticated(response)
+json_obj= get_authenticated(response)
 
-   #  Fetching values of different fields for creating jira issue under fetch_data() function and storing those data
-   json_data = fetch_data(json_obj)
+try:
+#using loop to generate required number of issues
+  payload = json.loads(json_obj.text)
+  if payload:
+   for j in range(9):
+     if(payload[j]["archived"] == "false"):
+#  Fetching values of different fields for creating jira issue under fetch_data() function and storing those data 
+      json_data = fetch_data(json_obj, j)
+# print(j)
+# generating new issue on jira after passing under the given function name 
+      generate_issue(json_data, generate_jira_url, generate_email, generate_api_key, j)
 
-   # generating new issue on jira after passing under the given function name 
-   generate_issue(json_data, "https://ibm-team-uz9mmme2.atlassian.net//rest/api/2/issue", email, api_key)
+  else:
+   print("Could not fetch data")
+
+except JIRAError:
+     print("Error:", json_obj.status_code)
 
 
 if __name__== "__main__": 
